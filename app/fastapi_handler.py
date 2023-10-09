@@ -18,7 +18,7 @@ class FastApiHandler:
             "params": dict
         }
 
-        self.__load_churn_model(model_path="models/catboost_churn_model.bin")
+        self.__load_churn_model(model_path="/docker/models/catboost_churn_model.bin")
 
     def __load_churn_model(self, model_path: str):
         """Загружаем обученную модель оттока.
