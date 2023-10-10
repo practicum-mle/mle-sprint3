@@ -30,6 +30,7 @@ RUN pip install --no-cache-dir --upgrade -r /docker/requirements.txt
 COPY ./app /docker/app
 
 ENV PYTHONPATH "${PYTHONPATH}:/docker/app/"
+ENV AM_I_IN_A_DOCKER_CONTAINER Yes
 
 # Set the command to run the uvicorn server.
 # CMD takes a list of strings, each of these strings is what you would type in the command line separated by spaces.

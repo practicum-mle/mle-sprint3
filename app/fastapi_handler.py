@@ -1,7 +1,7 @@
 # coding: utf-8
 """Класс FastApiHandler, который обрабатывает запросы API."""
 
-
+import os
 from fastapi import HTTPException, status
 from catboost import CatBoostClassifier
 
@@ -18,7 +18,14 @@ class FastApiHandler:
             "params": dict
         }
 
-        self.__load_churn_model(model_path="/docker/models/catboost_churn_model.bin")
+        # Проверяем, откуда происходит запуск сервиса - из докера или без него
+        is_docker_run = os.environ.get('AM_I_IN_A_DOCKER_CONTAINER', False)
+        model_path = "../models/catboost_churn_model.bin"
+
+        if is_docker_run:
+            print("I am running in a Docker container")
+            model_path = "/docker/models/catboost_churn_model.bin"
+        self.__load_churn_model(model_path=model_path)
 
     def __load_churn_model(self, model_path: str):
         """Загружаем обученную модель оттока.

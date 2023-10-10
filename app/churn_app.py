@@ -1,11 +1,20 @@
 # coding: utf-8
 """Приложение Fast API для модели оттока."""
 
+
 from fastapi import FastAPI, Body
 from typing import Dict, Union
 from pydantic import BaseModel, Field
 
 from fastapi_handler import FastApiHandler
+
+
+"""
+Пример запуска из директории mle-sprint3/app:
+uvicorn churn_app:app --reload --port 8080 --host 0.0.0.0
+
+Для просмотра документации API и совершения тестовых запросов зайти на http://0.0.0.0:8080/api/public/v1/doc
+"""
 
 
 class Item(BaseModel):
