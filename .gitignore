@@ -127,6 +127,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+.mle-sprint3
 
 # Spyder project settings
 .spyderproject
