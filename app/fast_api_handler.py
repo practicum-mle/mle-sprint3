@@ -1,7 +1,7 @@
 """Класс FastApiHandler, который обрабатывает запросы API."""
 
 # импортируем класс модели
-from catboost import CatBoostRegressor
+from catboost import CatBoostClassifier
 
 class FastApiHandler:
     """Класс FastApiHandler, который обрабатывает запрос и возвращает предсказание."""
@@ -15,33 +15,35 @@ class FastApiHandler:
 
         # типы параметров запроса для проверки
         self.query_param_types = {
-            "client_id": str,
+            "user_id": str,
             "model_params": dict
         }
-        # список необходимых параметров модели 
+        # необходимые параметры для предсказаний модели оттока
         self.required_model_params = [
-            'gender', 'Type', 'PaperlessBilling', 'PaymentMethod', 
-            'MonthlyCharges', 'TotalCharges'
-        ]
+                'gender', 'SeniorCitizen', 'Partner', 'Dependents', 'Type', 'PaperlessBilling', 'PaymentMethod', 
+                'MonthlyCharges', 'TotalCharges', 'MultipleLines', 'InternetService', 'OnlineSecurity', 
+                'OnlineBackup', 'DeviceProtection', 'TechSupport', 'StreamingTV', 'StreamingMovies', 'days', 'services'
+            ]
         self.model_path = model_path
         self.load_credit_model()
 
     def load_credit_model(self):
-        """Загружаем обученную модель предсказания кредитного рейтинга."""
+        """Загружаем обученную модель оттока."""
+
         try:
-            self.model = CatBoostRegressor()
+            self.model = CatBoostClassifier()
             self.model.load_model(self.model_path)
         except Exception as e:
             print(f"Failed to load model: {e}") 
 
-    def credit_rating_predict(self, model_params: dict) -> float:
-        """Предсказываем кредитный рейтинг.
+    def churn_predict(self, model_params: dict) -> float:
+        """Предсказываем вероятность оттока.
 
         Args:
-            model_params (dict): Параметры для получения предсказаний моделью.
+            model_params (dict): Параметры для модели.
 
         Returns:
-            float — кредитный рейтинг
+            float - вероятность оттока от 0 до 1
 
         Examples:
             "model_params": {
@@ -54,7 +56,8 @@ class FastApiHandler:
                 ...
             }
         """
-        return self.model.predict(list(model_params.values())) 
+        param_values_list = list(model_params.values())
+        return self.model.predict_proba(param_values_list)[1]
 
     def check_required_query_params(self, query_params: dict) -> bool:
         """Проверяем параметры запроса на наличие обязательного набора.
@@ -67,7 +70,7 @@ class FastApiHandler:
 
        	Examples:
             "query_params": {
-                "client_id": 123,
+                "user_id": 123,
                 "model_params": {...}
             } 
         """
@@ -88,7 +91,7 @@ class FastApiHandler:
 
        	Examples:
             "query_params": {
-                "client_id": "123",
+                "user_id": "123",
                 "model_params": {...}
             } 
         """
@@ -109,7 +112,7 @@ class FastApiHandler:
         """
         if set(model_params.keys()) == set(self.required_model_params):
             return True
-        return False 
+        return False
  
     def validate_params(self, params: dict) -> bool:
         """Проверяем корректность параметров запроса и параметров модели.
@@ -122,7 +125,7 @@ class FastApiHandler:
 
         Examples:
             "params": {
-                "client_id": "123",
+                "user_id": "123",
                 "model_params": {
                     "gender": 1.0,
                     "Type": 0.5501916796819537,
@@ -169,13 +172,14 @@ class FastApiHandler:
                 response = {"Error": "Problem with parameters"}
             else:
                 model_params = params["model_params"]
-                client_id = params["client_id"]
-                print(f"Predicting for client_id: {client_id} and model_params:\n{model_params}")
+                user_id = params["user_id"]
+                print(f"Predicting for user_id: {user_id} and model_params:\n{model_params}")
                 # Получаем предсказания модели
-                predicted_rating = self.credit_rating_predict(model_params)
+                probability = self.churn_predict(model_params)
                 response = {
-                    "client_id": client_id, 
-                    "predicted_credit_rating": predicted_rating
+                    "user_id": user_id, 
+                    "probability": probability,
+                    "is_churn": int(probability > 0.5),
                 }
         except Exception as e:
             print(f"Error while handling request: {e}")
@@ -183,29 +187,32 @@ class FastApiHandler:
         else:
             return response 
 
+
 if __name__ == "__main__":
 
-    # test_params = {
-    #     "client_id": 123,
-    #     "params": {
-    #         "gender": 1.0,
-    #         "Type": 0.5501916796819537,
-    #         "PaperlessBilling": 1.0,
-    #         "PaymentMethod": 0.2192247621752094,
-    #         "MonthlyCharges": 50.8,
-    #         "TotalCharges": 288.05,
-    #     }
-    # }
-
+    # создаём тестовый запрос
     test_params = {
-        "client_id": "123",
+        "user_id": "123",
         "model_params": {
-            "gender": 1.0,
-            "Type": 0.5501916796819537,
-            "PaperlessBilling": 1.0,
-            "PaymentMethod": 0.2192247621752094,
-            "MonthlyCharges": 50.8,
-            "TotalCharges": 288.05,
+            'gender': 1.0,
+            'SeniorCitizen': 0.0,
+            'Partner': 0.0,
+            'Dependents': 0.0,
+            'Type': 0.5501916796819537,
+            'PaperlessBilling': 1.0,
+            'PaymentMethod': 0.2192247621752094,
+            'MonthlyCharges': 50.8,
+            'TotalCharges': 288.05,
+            'MultipleLines': 0.0,
+            'InternetService': 0.3437455629703251,
+            'OnlineSecurity': 0.0,
+            'OnlineBackup': 0.0,
+            'DeviceProtection': 0.0,
+            'TechSupport': 1.0,
+            'StreamingTV': 0.0,
+            'StreamingMovies': 0.0,
+            'days': 245.0,
+            'services': 2.0
         }
     }
 
