@@ -6,7 +6,7 @@ from catboost import CatBoostRegressor
 class FastApiHandler:
     """Класс FastApiHandler, который обрабатывает запрос и возвращает предсказание."""
 
-    def __init__(self, model_path: str = "models/catboost_credit_model.bin"):
+    def __init__(self, model_path: str = "../models/catboost_churn_model.bin"):
         """Инициализация переменных класса.
 
         Args:
