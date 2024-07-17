@@ -13,17 +13,17 @@ class FastApiHandler:
             model_path (str): Путь до модели.
         """
 
-        # типы параметров запроса для проверки
+        # Типы параметров запроса для проверки
         self.query_param_types = {
             "user_id": str,
             "model_params": dict
         }
-        # необходимые параметры для предсказаний модели оттока
+        # Необходимые параметры для предсказаний модели оттока
         self.required_model_params = [
-                'gender', 'SeniorCitizen', 'Partner', 'Dependents', 'Type', 'PaperlessBilling', 'PaymentMethod', 
-                'MonthlyCharges', 'TotalCharges', 'MultipleLines', 'InternetService', 'OnlineSecurity', 
-                'OnlineBackup', 'DeviceProtection', 'TechSupport', 'StreamingTV', 'StreamingMovies', 'days', 'services'
-            ]
+            'gender', 'SeniorCitizen', 'Partner', 'Dependents', 'Type', 'PaperlessBilling', 'PaymentMethod', 
+            'MonthlyCharges', 'TotalCharges', 'MultipleLines', 'InternetService', 'OnlineSecurity', 
+            'OnlineBackup', 'DeviceProtection', 'TechSupport', 'StreamingTV', 'StreamingMovies', 'days', 'services'
+        ]
         self.model_path = model_path
         self.load_credit_model()
 
